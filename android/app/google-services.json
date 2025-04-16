@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "664074127987",
+    "project_id": "totalizasubs",
+    "storage_bucket": "totalizasubs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664074127987:android:a30d4b777ae8bf5aa67806",
+        "android_client_info": {
+          "package_name": "com.example.totaliza_subs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJXX45o9hwuINmHis8ygQAHX8ubRWwRh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
