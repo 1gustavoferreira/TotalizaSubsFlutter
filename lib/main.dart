@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'features/auth/login_page.dart';
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const TotalizaSubsApp());
 }
 
@@ -26,8 +34,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       body: Center(
         child: Container(
@@ -35,16 +41,15 @@ class HomePage extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 600),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
                 width: 300,
-                height: 10,
+                height: 100,
                 child: Image.asset('assets/images/totalizaLogo.png'),
               ),
               const SizedBox(height: 20),
               Text(
-                'Bem-vindo ao TotalizaSubs!',
+                'Bem‑vindo ao TotalizaSubs!',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -59,8 +64,12 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  // Ação ao clicar em "Começar"
-                  print("Botão Começar pressionado!");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LoginPage(),
+                    ),
+                  );
                 },
                 child: const Text('Começar'),
               ),
