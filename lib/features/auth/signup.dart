@@ -12,13 +12,17 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
 
   Future<void> _createAccount() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
+    final name = nameController.text.trim(); 
+    final phone = phoneController.text.trim();
 
     // Validação simples
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty || name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos.')),
       );
@@ -31,6 +35,14 @@ class _SignupPageState extends State<SignupPage> {
         email: email,
         password: password,
       );
+
+      // Aqui você pode salvar o nome e o telefone no Firebase ou em um banco de dados
+      // Exemplo (supondo que você tenha um banco para armazenar essas informações):
+      // FirebaseFirestore.instance.collection('users').add({
+      //   'name': name,
+      //   'phone': phone,
+      // });
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Conta criada com sucesso!')),
       );
@@ -51,6 +63,25 @@ class _SignupPageState extends State<SignupPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nome',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.person),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: phoneController,
+              decoration: const InputDecoration(
+                labelText: 'Número de Telefone (opcional)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.phone),
+              ),
+              keyboardType: TextInputType.phone,
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: emailController,
               decoration: const InputDecoration(
