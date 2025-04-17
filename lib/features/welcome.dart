@@ -44,7 +44,10 @@ class WelcomePage extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text('Começar'),
+                child: const Text(
+                  'Começar',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ],
           ),
