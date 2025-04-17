@@ -88,7 +88,11 @@ class _LoginState extends State<LoginPage> {
                 },
                 child: const SizedBox(
                   width: double.infinity,
-                  child: Text('Entrar', textAlign: TextAlign.center),
+                  child: Text(
+                    'Entrar',
+                    textAlign: TextAlign.center,
+                     style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -106,9 +110,15 @@ class _LoginState extends State<LoginPage> {
               const SizedBox(height: 16),
 
               // Login com Google (em breve)
-              ElevatedButton.icon(
-                icon: const Icon(Icons.login),
-                label: const Text('Login com Google'),
+              ElevatedButton.icon( 
+                icon: const Icon(
+                  Icons.login,
+                  color: Colors.black,
+                ),
+                label: const Text(
+                  'Login com Google',
+                  style: TextStyle(color: Colors.black),
+                ),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
                 ),
@@ -116,15 +126,17 @@ class _LoginState extends State<LoginPage> {
                   // TODO: implementar Google Sign-In
                 },
               ),
-              const SizedBox(height: 16),
 
+              const SizedBox(height: 16),
               // Criar conta
               TextButton(
                 onPressed: () {
-                  // Navegar para a tela de cadastro
-                  Navigator.pushReplacementNamed(context, AppRoutes.signup); // Corrigido para a tela de cadastro
+                  Navigator.pushReplacementNamed(context, AppRoutes.signup);
                 },
-                child: const Text('Criar conta'),
+                child: const Text(
+                  'Criar conta',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ],
           ),

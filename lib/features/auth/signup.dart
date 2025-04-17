@@ -53,20 +53,30 @@ class _SignupPageState extends State<SignupPage> {
           children: [
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'E-mail'),
+              decoration: const InputDecoration(
+                labelText: 'E-mail',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email),
+              ),
               keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 16),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Senha'),
+              decoration: const InputDecoration(
+                labelText: 'Senha',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.lock),
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _createAccount,
               child: const SizedBox(
                 width: double.infinity,
-                child: Text('Cadastrar', textAlign: TextAlign.center),
+                child: Text('Cadastrar',                  style: TextStyle(color: Colors.black),
+                textAlign: TextAlign.center),
               ),
             ),
           ],
