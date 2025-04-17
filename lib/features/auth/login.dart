@@ -1,31 +1,28 @@
-import 'package:firebase_auth/firebase_auth.dart'; // Adicione essa importação
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class Login extends StatefulWidget {
+  const Login({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<Login> createState() => _LoginState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
   String _email = '', _password = '';
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Instância do FirebaseAuth
-  String _errorMessage = ''; // Para mostrar erro de login
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String _errorMessage = '';
 
   // Função de login
   Future<void> _login() async {
     try {
-      // Tente fazer o login com e-mail e senha
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: _email,
         password: _password,
       );
       print('Usuário logado: ${userCredential.user?.email}');
-
-      // Redirecionar para a tela principal ou inicial
-      Navigator.pushReplacementNamed(context, '/home'); // Defina a rota para a tela inicial
+      Navigator.pushReplacementNamed(context, '/home'); // Redireciona para Home
     } catch (e) {
       setState(() {
         _errorMessage = 'Erro: ${e.toString()}';
@@ -94,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 16),
 
-              // Mensagem de erro, caso haja
+              // Mensagem de erro
               if (_errorMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
@@ -106,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 16),
 
-              // Login com Google
+              // Login com Google (em breve)
               ElevatedButton.icon(
                 icon: const Icon(Icons.login),
                 label: const Text('Login com Google'),

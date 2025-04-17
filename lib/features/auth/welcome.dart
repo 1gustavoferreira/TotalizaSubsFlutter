@@ -1,9 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'features/auth/login_page.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'features/auth/login.dart'; // Alterei para o arquivo correto
-import 'features/home/home.dart'; // Alterei para o arquivo correto
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,18 +23,13 @@ class TotalizaSubsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const Welcome(), // Alterei para o arquivo correto
-        '/home': (context) => const Home(), // Alterei para o arquivo correto
-        '/login': (context) => const Login(), // Alterei para o arquivo correto
-      },
+      home: const WelcomePage(),  // A tela inicial será a WelcomePage
     );
   }
 }
 
-class Welcome extends StatelessWidget {
-  const Welcome({super.key});
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +70,7 @@ class Welcome extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const Login(),
+                      builder: (_) => const LoginPage(),
                     ),
                   );
                 },
