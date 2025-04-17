@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'features/auth/login.dart'; // Alterei para o arquivo correto
-import 'features/home/home.dart'; // Alterei para o arquivo correto
+import 'features/auth/login.dart';
+import 'features/home/home.dart'; 
+import 'features/welcome.dart';
+import 'features/auth/signup.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,68 +26,13 @@ class TotalizaSubsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      initialRoute: '/',
+      initialRoute: '/welcome',
       routes: {
-        '/': (context) => const Welcome(), // Alterei para o arquivo correto
-        '/home': (context) => const Home(), // Alterei para o arquivo correto
-        '/login': (context) => const Login(), // Alterei para o arquivo correto
+        '/': (context) => const WelcomePage(),
+        '/home': (context) => const HomePage(),
+        '/login': (context) => const LoginPage(),
+        '/signup': (context) => SignupPage(),
       },
-    );
-  }
-}
-
-class Welcome extends StatelessWidget {
-  const Welcome({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo do aplicativo
-              SizedBox(
-                width: 300,
-                height: 100,
-                child: Image.asset('assets/images/totalizaLogo.png'),
-              ),
-              const SizedBox(height: 20),
-              // Título de boas-vindas
-              Text(
-                'Bem‑vindo ao TotalizaSubs!',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 20),
-              // Descrição do app
-              Text(
-                'Organize suas assinaturas e veja seus gastos recorrentes de forma simples.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 40),
-              // Botão para ir ao login
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const Login(),
-                    ),
-                  );
-                },
-                child: const Text('Começar'),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../routes/app_routes.dart'; // Importando a rota para navegação
+import '../routes/app_routes.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -30,6 +30,9 @@ class _SignupPageState extends State<SignupPage> {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta criada com sucesso!')),
       );
       Navigator.pushReplacementNamed(context, AppRoutes.home); // Navegação para a home
     } catch (e) {

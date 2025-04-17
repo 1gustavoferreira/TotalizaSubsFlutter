@@ -1,14 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:totaliza_subs/features/auth/signup.dart';
+import 'package:totaliza_subs/features/routes/app_routes.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<LoginPage> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   String _email = '', _password = '';
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -22,7 +24,7 @@ class _LoginState extends State<Login> {
         password: _password,
       );
       print('Usuário logado: ${userCredential.user?.email}');
-      Navigator.pushReplacementNamed(context, '/home'); // Redireciona para Home
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
     } catch (e) {
       setState(() {
         _errorMessage = 'Erro: ${e.toString()}';
@@ -119,7 +121,8 @@ class _LoginState extends State<Login> {
               // Criar conta
               TextButton(
                 onPressed: () {
-                  // TODO: navegue para a tela de cadastro
+                  // Navegar para a tela de cadastro
+                  Navigator.pushReplacementNamed(context, AppRoutes.signup); // Corrigido para a tela de cadastro
                 },
                 child: const Text('Criar conta'),
               ),
