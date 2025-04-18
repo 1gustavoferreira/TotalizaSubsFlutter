@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:totaliza_subs/features/auth/signup.dart';
 import 'package:totaliza_subs/features/routes/app_routes.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,6 +31,36 @@ class _LoginState extends State<LoginPage> {
         _errorMessage = 'Erro: ${e.toString()}';
       });
       print('Erro ao fazer login: $e');
+    }
+  }
+
+  // Login com Google
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // Usuário cancelou
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      print('Login com Google: ${userCredential.user?.email}');
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = 'Erro ao logar com Google: ${e.message}';
+      });
+    } catch (e) {
+      setState(() {
+        //_errorMessage = 'Erro inesperado: $e';
+      });
     }
   }
 
@@ -123,8 +154,8 @@ class _LoginState extends State<LoginPage> {
                   minimumSize: const Size(double.infinity, 48),
                 ),
                 onPressed: () {
-                  // TODO: implementar Google Sign-In
-                },
+                  _signInWithGoogle();
+                },    
               ),
 
               const SizedBox(height: 16),
