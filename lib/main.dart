@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'features/auth/login.dart';
-import 'features/home/home.dart'; 
+import 'features/page/home.dart'; 
 import 'features/welcome.dart';
 import 'features/auth/signup.dart';
 
@@ -26,7 +26,7 @@ class TotalizaSubsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      initialRoute: '/welcome',
+      initialRoute: '/home',
       routes: {
         '/': (context) => const WelcomePage(),
         '/home': (context) => const HomePage(),
