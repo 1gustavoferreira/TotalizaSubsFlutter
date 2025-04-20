@@ -16,11 +16,11 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   final _dueDateController = TextEditingController();
 
   String? _userId;
+  DateTime? _selectedDate; // ✅ Declaração correta aqui!
 
   @override
   void initState() {
     super.initState();
-    // Pega o ID do usuário logado
     _userId = FirebaseAuth.instance.currentUser?.uid;
   }
 
@@ -28,25 +28,21 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     if (_formKey.currentState?.validate() ?? false) {
       final name = _nameController.text;
       final price = double.tryParse(_priceController.text) ?? 0;
-      final dueDate = DateTime.tryParse(_dueDateController.text);
 
-      if (dueDate == null) {
-        // Se a data de vencimento for inválida, mostra um erro
+      if (_selectedDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Data de vencimento inválida!')),
+          const SnackBar(content: Text('Selecione uma data de vencimento!')),
         );
         return;
       }
 
-      // Cria o documento da assinatura no Firestore
       await FirebaseFirestore.instance.collection('subscriptions').add({
         'name': name,
         'price': price,
-        'dueDate': Timestamp.fromDate(dueDate),
+        'dueDate': Timestamp.fromDate(_selectedDate!), // ✅ garantido que não é nulo
         'userId': _userId,
       });
 
-      // Exibe uma mensagem de sucesso e navega de volta para a tela anterior
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Assinatura adicionada com sucesso!')),
       );
@@ -71,7 +67,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                 decoration: const InputDecoration(
                   labelText: 'Nome da Assinatura',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.card_giftcard),
+                  prefixIcon: Icon(Icons.subscriptions),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -81,6 +77,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                 },
               ),
               const SizedBox(height: 16),
+
               TextFormField(
                 controller: _priceController,
                 decoration: const InputDecoration(
@@ -100,14 +97,30 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                 },
               ),
               const SizedBox(height: 16),
+
               TextFormField(
                 controller: _dueDateController,
+                readOnly: true,
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedDate = pickedDate;
+                      _dueDateController.text = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                    });
+                  }
+                },
                 decoration: const InputDecoration(
-                  labelText: 'Data de Vencimento (AAAA-MM-DD)',
+                  labelText: 'Data de Vencimento',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.date_range),
                 ),
-                keyboardType: TextInputType.datetime,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Data de vencimento é obrigatória';
@@ -115,17 +128,17 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
+
               ElevatedButton(
                 onPressed: _saveSubscription,
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.blue,
                 ),
                 child: const Text(
                   'Salvar Assinatura',
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],

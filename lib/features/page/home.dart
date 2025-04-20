@@ -105,8 +105,9 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add-subscription'); // Navegação para adicionar assinatura
+        onPressed: () async {
+          await Navigator.pushNamed(context, '/add-subscription');
+          fetchSubscriptions();
         },
         icon: const Icon(Icons.add),
         label: const Text('Adicionar'),
