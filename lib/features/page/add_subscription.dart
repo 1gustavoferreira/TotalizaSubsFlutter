@@ -14,9 +14,20 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _dueDateController = TextEditingController();
+  final _cardNameController = TextEditingController();
 
   String? _userId;
-  DateTime? _selectedDate; // ✅ Declaração correta aqui!
+  String? _selectedCategory;
+  DateTime? _selectedDate;
+
+  final List<String> _categories = [
+    'Streaming',
+    'Educação',
+    'Academia',
+    'Jogos',
+    'Utilitários',
+    'Outros',
+  ];
 
   @override
   void initState() {
@@ -36,11 +47,20 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
         return;
       }
 
+      if (_selectedCategory == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Selecione uma categoria!')),
+        );
+        return;
+      }
+
       await FirebaseFirestore.instance.collection('subscriptions').add({
         'name': name,
         'price': price,
-        'dueDate': Timestamp.fromDate(_selectedDate!), // ✅ garantido que não é nulo
+        'dueDate': Timestamp.fromDate(_selectedDate!),
         'userId': _userId,
+        'category': _selectedCategory,
+        'cardName': _cardNameController.text, // Pode ser vazio
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -95,6 +115,42 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'Categoria',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.category),
+                ),
+                items: _categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Categoria é obrigatória';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _cardNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nome do Cartão (opcional)',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.credit_card),
+                ),
               ),
               const SizedBox(height: 16),
 

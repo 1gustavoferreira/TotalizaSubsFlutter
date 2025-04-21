@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:totaliza_subs/features/routes/app_routes.dart';
-import 'package:totaliza_subs/features/page/add_subscription.dart'; // Certifique-se de importar a página de adicionar assinatura
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,23 +23,19 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> fetchSubscriptions() async {
     if (currentUser != null) {
-      // Verificando se o userId está correto
-      print("User ID: ${currentUser!.uid}"); // Depuração para verificar o UID
-
       final query = await FirebaseFirestore.instance
           .collection('subscriptions')
-          .where('userId', isEqualTo: currentUser!.uid)  // Filtrando por userId
+          .where('userId', isEqualTo: currentUser!.uid)
           .get();
 
-      if (query.docs.isEmpty) {
-        print("Nenhuma assinatura encontrada para o usuário ${currentUser!.uid}");
-      }
-
       setState(() {
-        subscriptions = query.docs.map((doc) => doc.data()).toList();
+        subscriptions = query.docs
+            .map((doc) => {
+                  ...doc.data(),
+                  'id': doc.id, // salvando ID para futuras operações
+                })
+            .toList();
       });
-    } else {
-      print("No user is logged in.");
     }
   }
 
@@ -51,6 +45,72 @@ class _HomePageState extends State<HomePage> {
       return DateFormat('dd/MM/yyyy').format(date);
     }
     return 'Sem data';
+  }
+
+  void showSubscriptionOptions(Map<String, dynamic> item) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text('Ver detalhes'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Detalhes de "${item['name']}"')),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Editar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Editar "${item['name']}"')),
+                  );
+                  // Aqui você pode navegar para uma tela de edição
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Excluir'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Confirmar exclusão'),
+                      content: const Text('Tem certeza que deseja excluir esta assinatura?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancelar'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Excluir'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    await FirebaseFirestore.instance
+                        .collection('subscriptions')
+                        .doc(item['id'])
+                        .delete();
+                    fetchSubscriptions();
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -95,8 +155,10 @@ class _HomePageState extends State<HomePage> {
                       children: subscriptions.map((item) {
                         return SubscriptionTile(
                           name: item['name'] ?? 'Sem nome',
-                          price: 'R\$ ${(item['price'] ?? 0).toDouble().toStringAsFixed(2)}',
+                          price:
+                              'R\$ ${(item['price'] ?? 0).toDouble().toStringAsFixed(2)}',
                           dueDate: formatDueDate(item['dueDate']),
+                          onTap: () => showSubscriptionOptions(item),
                         );
                       }).toList(),
                     ),
@@ -120,12 +182,14 @@ class SubscriptionTile extends StatelessWidget {
   final String name;
   final String price;
   final String dueDate;
+  final VoidCallback? onTap;
 
   const SubscriptionTile({
     super.key,
     required this.name,
     required this.price,
     required this.dueDate,
+    this.onTap,
   });
 
   @override
@@ -133,6 +197,7 @@ class SubscriptionTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: ListTile(
+        onTap: onTap,
         leading: const Icon(Icons.subscriptions),
         title: Text(name),
         subtitle: Text('Vencimento: $dueDate'),
