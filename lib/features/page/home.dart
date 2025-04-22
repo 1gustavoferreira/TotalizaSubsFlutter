@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'add_subscription.dart'; // Importa a página de adicionar assinatura
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         subscriptions = query.docs
             .map((doc) => {
                   ...doc.data(),
-                  'id': doc.id, // salvando ID para futuras operações
+                  'id': doc.id,
                 })
             .toList();
       });
@@ -59,20 +60,13 @@ class _HomePageState extends State<HomePage> {
                 title: const Text('Ver detalhes'),
                 onTap: () {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Detalhes de "${item['name']}"')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          AddSubscriptionPage(subscription: item),
+                    ),
                   );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Editar'),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Editar "${item['name']}"')),
-                  );
-                  // Aqui você pode navegar para uma tela de edição
                 },
               ),
               ListTile(
@@ -84,7 +78,8 @@ class _HomePageState extends State<HomePage> {
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Confirmar exclusão'),
-                      content: const Text('Tem certeza que deseja excluir esta assinatura?'),
+                      content: const Text(
+                          'Tem certeza que deseja excluir esta assinatura?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -136,75 +131,52 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16),
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.indigo.shade100,
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 'R\$ ${total.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 24),
-            const Text('Minhas assinaturas',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 12),
+            const Text(
+              'Minhas Assinaturas',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
             Expanded(
-              child: subscriptions.isEmpty
-                  ? const Center(child: Text('Nenhuma assinatura cadastrada.'))
-                  : ListView(
-                      children: subscriptions.map((item) {
-                        return SubscriptionTile(
-                          name: item['name'] ?? 'Sem nome',
-                          price:
-                              'R\$ ${(item['price'] ?? 0).toDouble().toStringAsFixed(2)}',
-                          dueDate: formatDueDate(item['dueDate']),
-                          onTap: () => showSubscriptionOptions(item),
-                        );
-                      }).toList(),
+              child: ListView.builder(
+                itemCount: subscriptions.length,
+                itemBuilder: (context, index) {
+                  final item = subscriptions[index];
+                  return Card(
+                    child: ListTile(
+                      title: Text(item['name'] ?? ''),
+                      subtitle: Text('Vence em: ${formatDueDate(item['dueDate'])}'),
+                      trailing: Text(
+                        'R\$ ${(item['price'] ?? 0).toStringAsFixed(2)}',
+                      ),
+                      onTap: () => showSubscriptionOptions(item),
                     ),
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await Navigator.pushNamed(context, '/add-subscription');
-          fetchSubscriptions();
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddSubscriptionPage(),
+            ),
+          );
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Adicionar'),
-      ),
-    );
-  }
-}
-
-class SubscriptionTile extends StatelessWidget {
-  final String name;
-  final String price;
-  final String dueDate;
-  final VoidCallback? onTap;
-
-  const SubscriptionTile({
-    super.key,
-    required this.name,
-    required this.price,
-    required this.dueDate,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: ListTile(
-        onTap: onTap,
-        leading: const Icon(Icons.subscriptions),
-        title: Text(name),
-        subtitle: Text('Vencimento: $dueDate'),
-        trailing: Text(price,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            )),
+        child: const Icon(Icons.add),
       ),
     );
   }

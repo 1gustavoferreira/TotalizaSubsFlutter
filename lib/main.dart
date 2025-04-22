@@ -41,7 +41,11 @@ class TotalizaSubsApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => SignupPage(),
         '/home': (context) => const RootPage(),
-        '/add-subscription': (context) => const AddSubscriptionPage(), // Rota para adicionar assinatura
+        '/add-subscription': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return AddSubscriptionPage(subscription:args);
+        },
       },
     );
   }
