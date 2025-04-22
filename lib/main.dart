@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart'; // Importando o Firebase Database
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'firebase_options.dart';
 
 // Autenticação
@@ -13,9 +14,7 @@ import 'features/page/home.dart';
 import 'features/page/settings.dart';
 import 'features/page/insights.dart';
 import 'features/page/reports.dart';
-
-// Serviço de assinaturas (criado no exemplo anterior)
-
+import 'features/page/add_subscription.dart'; // Importando a página de adicionar assinatura
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,12 +36,34 @@ class TotalizaSubsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      initialRoute: '/home',
+      home: const AuthGate(), // Ponto de entrada para autenticação
       routes: {
-        '/welcome': (context) => const WelcomePage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => SignupPage(),
         '/home': (context) => const RootPage(),
+        '/add-subscription': (context) => const AddSubscriptionPage(), // Rota para adicionar assinatura
+      },
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>( 
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasData) {
+          return const RootPage(); // Usuário logado
+        } else {
+          return const WelcomePage(); // Usuário não logado
+        }
       },
     );
   }
@@ -100,4 +121,3 @@ class _RootPageState extends State<RootPage> {
     );
   }
 }
-

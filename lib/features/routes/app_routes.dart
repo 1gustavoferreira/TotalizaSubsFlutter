@@ -6,6 +6,7 @@ import 'package:totaliza_subs/features/page/home.dart';
 import 'package:totaliza_subs/features/page/settings.dart';
 import 'package:totaliza_subs/features/page/insights.dart';
 import 'package:totaliza_subs/features/page/reports.dart';
+import 'package:totaliza_subs/features/page/add_subscription.dart';
 
 class AppRoutes {
   static const String login = '/login';
@@ -15,6 +16,7 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String insights = '/insights';
   static const String reports = '/reports';
+  static const String addSubscription = '/add-subscription';
 
   static Map<String, WidgetBuilder> routes = {
     login: (context) => const LoginPage(),
@@ -24,6 +26,7 @@ class AppRoutes {
     settings: (context) => const SettingsPage(),
     insights: (context) => const InsightsPage(),
     reports: (context) => const ReportsPage(),
+    addSubscription: (context) => const AddSubscriptionPage(),
   };
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -42,9 +45,10 @@ class AppRoutes {
         return MaterialPageRoute(builder: (context) => const InsightsPage());
       case '/reports':
         return MaterialPageRoute(builder: (context) => const ReportsPage());
+      case '/add-subscription':
+        return MaterialPageRoute(builder: (context) => const AddSubscriptionPage());
       default:
         return MaterialPageRoute(builder: (context) => const WelcomePage());
     }
   }
-
 }
