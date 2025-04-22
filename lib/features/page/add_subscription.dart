@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
-  const AddSubscriptionPage({super.key});
+  final Map<String, dynamic>? subscription;  // Passando dados da assinatura (se existir)
+
+  const AddSubscriptionPage({super.key, this.subscription});
 
   @override
   _AddSubscriptionPageState createState() => _AddSubscriptionPageState();
@@ -20,6 +22,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   String? _selectedCategory;
   DateTime? _selectedDate;
 
+  bool _isEditing = false;  // Flag para indicar que estamos editando
+
   final List<String> _categories = [
     'Streaming',
     'Educação',
@@ -33,6 +37,32 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   void initState() {
     super.initState();
     _userId = FirebaseAuth.instance.currentUser?.uid;
+
+    // Se a assinatura foi passada (para edição), carrega os dados
+    if (widget.subscription != null) {
+      _loadDataForEdit();
+    }
+  }
+
+  void _loadDataForEdit() {
+    final subscription = widget.subscription!;
+    _nameController.text = subscription['name'] ?? '';
+    _priceController.text = subscription['price'].toString();
+    _selectedCategory = subscription['category'];
+    _cardNameController.text = subscription['cardName'] ?? '';
+    _dueDateController.text = formatDate(subscription['dueDate']);
+    _selectedDate = (subscription['dueDate'] as Timestamp?)?.toDate();
+    setState(() {
+      _isEditing = true;  // Agora estamos editando
+    });
+  }
+
+  String formatDate(dynamic dueDate) {
+    if (dueDate is Timestamp) {
+      final date = dueDate.toDate();
+      return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    }
+    return '';
   }
 
   Future<void> _saveSubscription() async {
@@ -54,17 +84,27 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection('subscriptions').add({
+      // Salvar ou atualizar no Firestore
+      final subscriptionData = {
         'name': name,
         'price': price,
         'dueDate': Timestamp.fromDate(_selectedDate!),
         'userId': _userId,
         'category': _selectedCategory,
-        'cardName': _cardNameController.text, // Pode ser vazio
-      });
+        'cardName': _cardNameController.text,
+      };
+
+      if (_isEditing) {
+        await FirebaseFirestore.instance
+            .collection('subscriptions')
+            .doc(widget.subscription?['id']) // ID da assinatura para edição
+            .update(subscriptionData);
+      } else {
+        await FirebaseFirestore.instance.collection('subscriptions').add(subscriptionData);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Assinatura adicionada com sucesso!')),
+        const SnackBar(content: Text('Assinatura salva com sucesso!')),
       );
       Navigator.pop(context);
     }
@@ -74,7 +114,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adicionar Assinatura'),
+        title: Text(_isEditing ? 'Editar Assinatura' : 'Adicionar Assinatura'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -119,6 +159,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
+                value: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Categoria',
                   border: OutlineInputBorder(),
@@ -160,7 +201,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                 onTap: () async {
                   final pickedDate = await showDatePicker(
                     context: context,
-                    initialDate: DateTime.now(),
+                    initialDate: _selectedDate ?? DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
@@ -168,7 +209,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   if (pickedDate != null) {
                     setState(() {
                       _selectedDate = pickedDate;
-                      _dueDateController.text = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                      _dueDateController.text =
+                          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
                     });
                   }
                 },
@@ -192,9 +234,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.blue,
                 ),
-                child: const Text(
-                  'Salvar Assinatura',
-                  style: TextStyle(color: Colors.white),
+                child: Text(
+                  _isEditing ? 'Salvar Alterações' : 'Salvar Assinatura',
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ],
