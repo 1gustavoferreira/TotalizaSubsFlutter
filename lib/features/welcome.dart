@@ -36,6 +36,14 @@ class WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white, 
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -44,10 +52,7 @@ class WelcomePage extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text(
-                  'Começar',
-                  style: TextStyle(color: Colors.black),
-                ),
+                child: const Text('Começar'),
               ),
             ],
           ),
