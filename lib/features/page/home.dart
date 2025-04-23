@@ -154,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                   return Card(
                     child: ListTile(
                       title: Text(item['name'] ?? ''),
-                      subtitle: Text('Vence em: ${formatDueDate(item['dueDate'])}'),
+                      subtitle: Text('Vence dia: ${formatDueDate(item['dueDate'])}'),
                       trailing: Text(
                         'R\$ ${(item['price'] ?? 0).toStringAsFixed(2)}',
                       ),
