@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
-  final Map<String, dynamic>? subscription;  // Passando dados da assinatura (se existir)
+  final Map<String, dynamic>? subscription;
 
   const AddSubscriptionPage({super.key, this.subscription});
 
@@ -22,15 +23,21 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   String? _selectedCategory;
   DateTime? _selectedDate;
 
-  bool _isEditing = false;  // Flag para indicar que estamos editando
+  bool _isEditing = false;
 
   final List<String> _categories = [
     'Streaming',
     'Educação',
     'Academia',
     'Jogos',
-    'Utilitários',
-    'Outros',
+    'Música',
+    'Notícias / Revistas',
+    'Cloud / Armazenamento',
+    'Produtividade',
+    'Delivery / Alimentação',
+    'Mobilidade',
+    'Compras / Clube de Benefícios',
+    'Saúde / Bem-estar',
   ];
 
   @override
@@ -38,7 +45,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     super.initState();
     _userId = FirebaseAuth.instance.currentUser?.uid;
 
-    // Se a assinatura foi passada (para edição), carrega os dados
     if (widget.subscription != null) {
       _loadDataForEdit();
     }
@@ -52,8 +58,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     _cardNameController.text = subscription['cardName'] ?? '';
     _dueDateController.text = formatDate(subscription['dueDate']);
     _selectedDate = (subscription['dueDate'] as Timestamp?)?.toDate();
+
     setState(() {
-      _isEditing = true;  // Agora estamos editando
+      _isEditing = true;
     });
   }
 
@@ -63,6 +70,20 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     }
     return '';
+  }
+
+  // Função para calcular a próxima data de vencimento
+  DateTime getNextDueDate(DateTime selectedDate) {
+    // Cria uma nova data com o mesmo dia do mês, mas ajustando o mês e ano conforme necessário.
+    DateTime now = DateTime.now();
+    DateTime nextDueDate = DateTime(now.year, now.month + 1, selectedDate.day);
+
+    // Verifica se a nova data está no futuro
+    if (nextDueDate.isBefore(now)) {
+      nextDueDate = DateTime(now.year + 1, now.month, selectedDate.day); // Ajusta para o próximo ano
+    }
+
+    return nextDueDate;
   }
 
   Future<void> _saveSubscription() async {
@@ -84,29 +105,40 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
         return;
       }
 
-      // Salvar ou atualizar no Firestore
+      // Chama a função para obter a próxima data de vencimento
+      DateTime nextDueDate = getNextDueDate(_selectedDate!);
+
       final subscriptionData = {
         'name': name,
         'price': price,
-        'dueDate': Timestamp.fromDate(_selectedDate!),
+        'dueDate': Timestamp.fromDate(nextDueDate), // Salva como Timestamp
         'userId': _userId,
         'category': _selectedCategory,
         'cardName': _cardNameController.text,
       };
 
-      if (_isEditing) {
-        await FirebaseFirestore.instance
-            .collection('subscriptions')
-            .doc(widget.subscription?['id']) // ID da assinatura para edição
-            .update(subscriptionData);
-      } else {
-        await FirebaseFirestore.instance.collection('subscriptions').add(subscriptionData);
-      }
+      try {
+        if (_isEditing && widget.subscription?['id'] != null) {
+          final docId = widget.subscription!['id'];
+          await FirebaseFirestore.instance
+              .collection('subscriptions')
+              .doc(docId)
+              .update(subscriptionData);
+        } else {
+          await FirebaseFirestore.instance
+              .collection('subscriptions')
+              .add(subscriptionData);
+        }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Assinatura salva com sucesso!')),
-      );
-      Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Assinatura salva com sucesso!')),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar: $e')),
+        );
+      }
     }
   }
 
@@ -129,12 +161,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.subscriptions),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nome da assinatura é obrigatório';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Campo obrigatório' : null,
               ),
               const SizedBox(height: 16),
 
@@ -151,30 +179,40 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     return 'Preço é obrigatório';
                   }
                   if (double.tryParse(value) == null) {
-                    return 'Por favor, insira um valor válido';
+                    return 'Valor inválido';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
 
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Categoria',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.category),
+              TypeAheadFormField<String>(
+                textFieldConfiguration: TextFieldConfiguration(
+                  decoration: const InputDecoration(
+                    labelText: 'Categoria',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.category),
+                  ),
+                  controller: TextEditingController(text: _selectedCategory),
                 ),
-                items: _categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
+                suggestionsCallback: (pattern) {
+                  return _categories
+                      .where((item) =>
+                          item.toLowerCase().contains(pattern.toLowerCase()))
+                      .toList();
+                },
+                itemBuilder: (context, String suggestion) {
+                  return ListTile(
+                    title: Text(suggestion),
                   );
-                }).toList(),
-                onChanged: (value) {
+                },
+                onSuggestionSelected: (String suggestion) {
                   setState(() {
-                    _selectedCategory = value;
+                    _selectedCategory = suggestion;
                   });
+                },
+                onSaved: (value) {
+                  _selectedCategory = value;
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -183,6 +221,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   return null;
                 },
               ),
+
               const SizedBox(height: 16),
 
               TextFormField(
@@ -205,7 +244,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
-
                   if (pickedDate != null) {
                     setState(() {
                       _selectedDate = pickedDate;
@@ -219,12 +257,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.date_range),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Data de vencimento é obrigatória';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Campo obrigatório' : null,
               ),
               const SizedBox(height: 24),
 
