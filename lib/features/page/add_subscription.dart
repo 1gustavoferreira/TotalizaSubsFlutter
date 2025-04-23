@@ -265,12 +265,16 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               ElevatedButton(
                 onPressed: _saveSubscription,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 16), // Espaçamento semelhante aos outros botões
+                  backgroundColor: Colors.blueAccent, // Cor de fundo semelhante aos outros botões
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Arredondando os cantos (valor ajustável)
+                  ),
+                  elevation: 4, // Sombra do botão (opcional)
                 ),
                 child: Text(
                   _isEditing ? 'Salvar Alterações' : 'Salvar Assinatura',
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
