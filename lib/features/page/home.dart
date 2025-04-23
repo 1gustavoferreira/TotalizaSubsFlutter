@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   String formatDueDate(dynamic dueDate) {
     if (dueDate is Timestamp) {
       final date = dueDate.toDate();
-      return DateFormat('dd/MM/yyyy').format(date);
+      return DateFormat('dd').format(date);
     }
     return 'Sem data';
   }
