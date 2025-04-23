@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'add_subscription.dart'; // Importa a página de adicionar assinatura
+import 'add_subscription.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -116,47 +116,99 @@ class _HomePageState extends State<HomePage> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('TotalizaSubs'), centerTitle: true),
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/totalizaLogo.png',
+              height: 40,
+              fit: BoxFit.contain,
+            ),
+          ],
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,  // Cor da AppBar
+        foregroundColor: Colors.black,  // Cor do texto na AppBar
+      ),
+      backgroundColor: Colors.white,  // Cor de fundo da tela
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Total gasto em assinaturas',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.all(16),
               width: double.infinity,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.blue.shade100,
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white, // Fundo branco
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Text(
                 'R\$ ${total.toStringAsFixed(2)}',
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black, // Cor do texto para combinar com o fundo branco
+                  letterSpacing: 1,
+                ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             const Text(
               'Minhas Assinaturas',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.4,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Expanded(
-              child: ListView.builder(
+              child: ListView.separated(
                 itemCount: subscriptions.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final item = subscriptions[index];
                   return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: ListTile(
-                      title: Text(item['name'] ?? ''),
-                      subtitle: Text('Vence dia: ${formatDueDate(item['dueDate'])}'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      title: Text(
+                        item['name'] ?? '',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        'Vence dia: ${formatDueDate(item['dueDate'])}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
                       trailing: Text(
                         'R\$ ${(item['price'] ?? 0).toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
                       onTap: () => showSubscriptionOptions(item),
                     ),
@@ -167,16 +219,23 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const AddSubscriptionPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const AddSubscriptionPage()),
           );
         },
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.blueAccent,
+        icon: const Icon(
+          Icons.add,
+          color: Colors.white, // Ícone branco
+        ),
+        label: const Text(
+          'Adicionar',
+          style: TextStyle(color: Colors.white), // Texto branco
+        ),
+        tooltip: 'Adicionar nova assinatura',
       ),
     );
   }
